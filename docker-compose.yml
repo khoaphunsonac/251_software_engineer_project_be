@@ -9,6 +9,6 @@ services:
       TZ: Asia/Ho_Chi_Minh
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
-      - "3306:3306" #Nếu cổng 3306 có ứng dụng chạy thì đổi
+      - "3307:3306" #Nếu cổng 3306 có ứng dụng chạy thì đổi
     volumes:
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
