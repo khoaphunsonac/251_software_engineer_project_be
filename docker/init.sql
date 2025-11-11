@@ -237,3 +237,112 @@ CREATE TABLE `feedback_student` (
     FOREIGN KEY (`student_id`) REFERENCES `user`(`id`)
       ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================
+-- SAMPLE DATA (MySQL)
+-- Thứ tự: role → datacore → hcmut_sso → user → subject → tutor_profile → tutor_schedule → student_schedule → session → notification → reportof_tutor → feedback_student
+-- ============================
+
+-- 1) ROLE
+INSERT INTO role (id, name, description) VALUES
+(1, 'admin',  'System administrator'),
+(2, 'tutor',  'Tutor / Mentor'),
+(3, 'student','Student');
+
+-- 2) DATACORE (core profile, gán role_id đúng FK)
+INSERT INTO datacore
+(id, role_id, hcmut_id, email, first_name, last_name, profile_image, faculty, academic_status, dob, phone, other_method_contact)
+VALUES
+(1, 1, 'NV001',    'loannt@hcmut.edu.vn',  'Nguyễn Thị', 'Loan',  NULL, 'Office of Student Affairs', 'Staff',        '1985-05-12', '0903000001', NULL),
+(2, 2, 'GV001',    'minhlv@hcmut.edu.vn',  'Lê Văn',     'Minh',  NULL, 'Applied Science',           'Faculty',      '1978-09-21', '0903000002', NULL),
+(3, 2, '17123456', '17123456@hcmut.edu.vn','Phạm Minh',  'Tâm',   NULL, 'CSE',                      'Graduate',     '1997-02-14', '0903000003', NULL),
+(4, 3, '20123456', '20123456@hcmut.edu.vn','Nguyễn Văn', 'An',    NULL, 'CSE',                      'Undergraduate','2004-08-10', '0903000004', 'Zalo: an.cse'),
+(5, 3, '20125678', '20125678@hcmut.edu.vn','Trần Thị',   'Bình',  NULL, 'Mechanical Engineering',    'Undergraduate','2006-01-18', '0903000005', NULL);
+
+-- 3) HCMUT_SSO (đăng nhập tập trung)
+INSERT INTO hcmut_sso (id, email, password, hcmut_id) VALUES
+(1, 'loannt@hcmut.edu.vn',   'admin123',   'NV001'),
+(2, '17123456@hcmut.edu.vn', 'tutor123',   '17123456'),
+(3, '20123456@hcmut.edu.vn', 'student123', '20123456');
+
+-- 4) USER (tài khoản hệ thống ứng dụng; dùng chuỗi role + hcmut_id để liên hệ)
+INSERT INTO `user`
+(id, status, created_date, update_date, last_login, role, hcmut_id, first_name, last_name, profile_image, faculty, academic_status, dob, phone, other_method_contact)
+VALUES
+(1, 'ACTIVE',  NOW(), NULL, NULL, 'admin',  'NV001',    'Nguyễn Thị', 'Loan', NULL, 'Office of Student Affairs', 'Staff',        '1985-05-12', '0903000001', NULL),
+(2, 'ACTIVE',  NOW(), NULL, NULL, 'tutor',  'GV001',    'Lê Văn',     'Minh', NULL, 'Applied Science',            'Faculty',      '1978-09-21', '0903000002', NULL),
+(3, 'ACTIVE',  NOW(), NULL, NULL, 'tutor',  '17123456', 'Phạm Minh',  'Tâm',  NULL, 'CSE',                        'Graduate',     '1997-02-14', '0903000003', NULL),
+(4, 'ACTIVE',  NOW(), NULL, NULL, 'student','20123456', 'Nguyễn Văn', 'An',   NULL, 'CSE',                        'Undergraduate','2004-08-10', '0903000004', 'Zalo: an.cse'),
+(5, 'ACTIVE',  NOW(), NULL, NULL, 'student','20125678', 'Trần Thị',   'Bình', NULL, 'Mechanical Engineering',     'Undergraduate','2006-01-18', '0903000005', NULL);
+
+-- 5) SUBJECT
+INSERT INTO `subject`
+(id, code, name, faculty, description, libary_resources)
+VALUES
+(1, 'MATH101', 'Calculus I',                  'Applied Science', 'Giải tích cơ bản (đạo hàm, tích phân).', NULL),
+(2, 'CS101',   'Programming Fundamentals',    'CSE',             'Lập trình cơ bản C/C++.',                 NULL),
+(3, 'PHYS101', 'Physics I',                   'Physics',         'Cơ học, nhiệt học cơ bản.',              NULL);
+
+-- 6) Học liệu (bảng tên `Table`)
+INSERT INTO `Table`
+(id, `name`, catagory, author, `subject`, url, uploaded_date, uploaded_by)
+VALUES
+(1, 'Calculus I - Lecture Notes', 'Notes',     'Dept. of Math', 'MATH101', 'https://library.hcmut.edu.vn/calc1.pdf',  NOW(), 2),
+(2, 'Prog 101 - Textbook',       'Textbook',  'CS Dept',      'CS101',   'https://library.hcmut.edu.vn/prog101.pdf', NOW(), 3);
+
+-- 7) TUTOR_PROFILE (hồ sơ tutor, FK: user_id → user.id)
+INSERT INTO tutor_profile
+(id, user_id, `subject`, experience_years, bio, rating, priority, total_sessions_completed, is_available)
+VALUES
+(1, 2, 'MATH101;PHYS101', 10, 'GV Toán cao cấp, kinh nghiệm 10 năm.', 4.85, 1, 120, 1),
+(2, 3, 'CS101',            3,  'NCS CNTT, dạy C/C++ & CTDL.',          4.70, 2, 45,  1);
+
+-- 8) TUTOR_SCHEDULE (0=Sun..6=Sat; TIME)
+INSERT INTO tutor_schedule
+(id, tutor_id, day_of_week, start_time, end_time, status, created_date, update_date)
+VALUES
+(1, 2, 2, '09:00:00', '11:00:00', 'OPEN', NOW(), NULL), -- Tue
+(2, 2, 4, '14:00:00', '16:00:00', 'OPEN', NOW(), NULL), -- Thu
+(3, 3, 3, '14:00:00', '15:00:00', 'OPEN', NOW(), NULL), -- Wed
+(4, 3, 6, '09:00:00', '11:00:00', 'OPEN', NOW(), NULL); -- Sat
+
+-- 9) STUDENT_SCHEDULE (availability của student)
+INSERT INTO student_schedule
+(id, student_id, day_of_week, start_time, end_time, status, created_date, update_date)
+VALUES
+(1, 4, 2, '08:00:00', '12:00:00', 'FREE', NOW(), NULL), -- An: Tue sáng
+(2, 4, 4, '13:00:00', '17:00:00', 'FREE', NOW(), NULL), -- An: Thu chiều
+(3, 5, 2, '08:00:00', '12:00:00', 'FREE', NOW(), NULL), -- Bình: Tue sáng
+(4, 5, 3, '13:00:00', '17:00:00', 'FREE', NOW(), NULL); -- Bình: Wed chiều
+
+-- 10) SESSION (mỗi buổi gán 1 tutor_id & 1 student_id)
+INSERT INTO `session`
+(id, tutor_id, student_id, subject_id, start_time, end_time, `format`, location, status, created_date, updated_date)
+VALUES
+(1, 2, 4, 1, '2025-10-14 09:00:00', '2025-10-14 10:30:00', 'offline', 'B10-201', 'COMPLETED', NOW(), NULL), -- GV Minh ↔ SV An (Calculus)
+(2, 3, 4, 2, '2025-10-15 14:00:00', '2025-10-15 15:00:00', 'online',  'Zoom',    'COMPLETED', NOW(), NULL), -- Thầy Tâm ↔ An (CS101)
+(3, 3, 5, 2, '2025-10-20 14:00:00', '2025-10-20 15:00:00', 'offline', 'B6-204',  'COMPLETED', NOW(), NULL); -- Thầy Tâm ↔ Bình (CS101)
+
+-- 11) NOTIFICATION
+INSERT INTO notification
+(id, user_id, related_session_id, type, title, message, is_read, sent_at, created_date)
+VALUES
+(1, 4, 1, 'REMIND', 'Nhắc lịch buổi học', 'Bạn có buổi Calculus I lúc 09:00 14/10/2025 tại B10-201.', 1, '2025-10-13 18:00:00', NOW()),
+(2, 3, 2, 'FEEDBACK', 'Phản hồi mới', 'SV Nguyễn Văn An đã gửi feedback cho buổi 15/10/2025.', 1, '2025-10-15 16:30:00', NOW()),
+(3, 1, NULL, 'REPORT', 'Báo cáo tháng 10', 'Đã hoàn thành 3 buổi tutor trong 10/2025.', 0, '2025-10-31 20:00:00', NOW());
+
+-- 12) REPORTOF_TUTOR (báo cáo sau buổi)
+INSERT INTO reportof_tutor
+(id, session_id, tutor_comment, student_summary, student_performance, material_used)
+VALUES
+(1, 1, 'SV An nắm vững đạo hàm cơ bản, cần luyện bài ứng dụng.', 'Tham gia tích cực, hỏi bài tốt.', 'Tốt', 'Calculus I - Lecture Notes'),
+(2, 2, 'Đã ôn mảng & vòng lặp, làm bài tập mẫu tốt.',             'Hiểu nhanh, hoàn thành bài.',    'Tốt', 'Prog 101 - Textbook'),
+(3, 3, 'Cần chậm lại phần cú pháp C++ cho SV Bình.',               'Tiếp thu được phần cơ bản.',      'Trung bình', 'Prog 101 - Textbook');
+
+-- 13) FEEDBACK_STUDENT (đánh giá của SV)
+INSERT INTO feedback_student
+(id, session_id, student_id, overall_rating, content_quality, teaching_effectiveness, communication, comment, suggestion, would_recommend, created_date)
+VALUES
+(1, 1, 4, 5, 5, 5, 5, 'Buổi học rất rõ ràng, em tự tin hơn.',          'Cho thêm bài tập ứng dụng.', 1, '2025-10-14 12:00:00'),
+(2, 2, 4, 5, 5, 5, 5, 'Tutor hướng dẫn nhiệt tình, dễ hiểu.',           'Giữ nhịp độ như hiện tại.',   1, '2025-10-15 16:20:00'),
+(3, 3, 5, 3, 3, 3, 3, 'Hơi nhanh, em cần thêm ví dụ minh hoạ.',         'Giảm tốc độ giảng, thêm ví dụ.', 1, '2025-10-20 16:10:00');
