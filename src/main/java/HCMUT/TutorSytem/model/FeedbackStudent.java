@@ -2,12 +2,15 @@ package HCMUT.TutorSytem.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -30,8 +33,10 @@ public class FeedbackStudent {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(name = "overall_rating", columnDefinition = "tinyint UNSIGNED")
-    private Short overallRating;
+    @Column(name = "rating", nullable = false, precision = 2, scale = 1)
+    @DecimalMin("0.5")
+    @DecimalMax("5.0")
+    private BigDecimal rating;
 
     @Column(name = "content_quality", columnDefinition = "tinyint UNSIGNED")
     private Short contentQuality;

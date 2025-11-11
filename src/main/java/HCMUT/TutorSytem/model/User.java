@@ -5,6 +5,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,14 +23,13 @@ public class User {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "status", length = 20)
-    private String status;
-
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date", nullable = false)
+    @CreationTimestamp
     private Instant createdDate;
 
     @Column(name = "update_date")
+    @UpdateTimestamp
     private Instant updateDate;
 
     @Column(name = "last_login")
@@ -48,9 +49,6 @@ public class User {
 
     @Column(name = "profile_image")
     private String profileImage;
-
-    @Column(name = "faculty", length = 100)
-    private String faculty;
 
     @Column(name = "academic_status", length = 100)
     private String academicStatus;
@@ -84,5 +82,15 @@ public class User {
 
     @OneToMany(mappedBy = "student")
     private Set<Session> sessionss = new LinkedHashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Status status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id",
+            foreignKey = @ForeignKey(name = "fk_user_major"))
+    private Major major;
+
 
 }

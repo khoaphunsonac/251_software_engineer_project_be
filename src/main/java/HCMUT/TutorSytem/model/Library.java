@@ -1,16 +1,18 @@
 package HCMUT.TutorSytem.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
+
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Entity
 @jakarta.persistence.Table(name = "`library`")
-public class Table {
+public class Library {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -25,16 +27,21 @@ public class Table {
     @Column(name = "author")
     private String author;
 
-    @Column(name = "subject")
-    private String subject;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subject_id",
+            foreignKey = @ForeignKey(name = "fk_library_subject"))
+    private Subject subject;
 
     @Column(name = "url")
     private String url;
 
     @Column(name = "uploaded_date")
+    @UpdateTimestamp
     private Instant uploadedDate;
 
     @Column(name = "uploaded_by")
     private Long uploadedBy;
 
+    @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportMaterial> reportMaterials = new ArrayList<>();
 }

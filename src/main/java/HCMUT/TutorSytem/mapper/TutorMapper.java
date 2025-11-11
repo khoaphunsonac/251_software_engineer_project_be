@@ -1,0 +1,69 @@
+package HCMUT.TutorSytem.mapper;
+
+import HCMUT.TutorSytem.dto.TutorDTO;
+import HCMUT.TutorSytem.model.TutorProfile;
+import HCMUT.TutorSytem.model.User;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class TutorMapper {
+
+    public TutorDTO toDTO(TutorProfile tutorProfile) {
+        if (tutorProfile == null) {
+            return null;
+        }
+
+        TutorDTO dto = new TutorDTO();
+        User user = tutorProfile.getUser();
+
+        dto.setId(tutorProfile.getId());
+        dto.setName(user.getFirstName() + " " + user.getLastName());
+        dto.setTitle(user.getAcademicStatus() != null ? user.getAcademicStatus() : "Tutor");
+
+        // Major information
+        if (user.getMajor() != null) {
+            dto.setMajorId(user.getMajor().getId());
+            dto.setMajorName(user.getMajor().getName());
+
+            // Department from major (faculty = department, no separate field)
+            if (user.getMajor().getDepartment() != null) {
+                dto.setDepartment(user.getMajor().getDepartment().getName());
+            }
+        }
+
+        dto.setDescription(tutorProfile.getBio());
+
+        // Subjects - convert to list of subject names for DTO
+        if (tutorProfile.getSubjects() != null && !tutorProfile.getSubjects().isEmpty()) {
+            dto.setSpecializations(
+                tutorProfile.getSubjects().stream()
+                    .map(subject -> subject.getName())
+                    .collect(Collectors.toList())
+            );
+        } else {
+            dto.setSpecializations(Collections.emptyList());
+        }
+
+        dto.setRating(tutorProfile.getRating() != null ? tutorProfile.getRating().doubleValue() : null);
+        dto.setReviewCount(0); // Can be calculated from feedback_student table
+        dto.setStudentCount(tutorProfile.getTotalSessionsCompleted() != null ? tutorProfile.getTotalSessionsCompleted().intValue() : 0);
+        dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : 0);
+        dto.setIsAvailable(tutorProfile.getIsAvailable());
+
+        return dto;
+    }
+
+    public List<TutorDTO> toDTOList(List<TutorProfile> tutorProfiles) {
+        if (tutorProfiles == null) {
+            return Collections.emptyList();
+        }
+        return tutorProfiles.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+}
+
