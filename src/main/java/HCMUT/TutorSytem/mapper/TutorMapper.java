@@ -21,7 +21,22 @@ public class TutorMapper {
         User user = tutorProfile.getUser();
 
         dto.setId(tutorProfile.getId());
-        dto.setName(user.getFirstName() + " " + user.getLastName());
+
+        // From User (Datacore)
+        dto.setHcmutId(user.getHcmutId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setProfileImage(user.getProfileImage());
+        dto.setAcademicStatus(user.getAcademicStatus());
+        dto.setDob(user.getDob());
+        dto.setPhone(user.getPhone());
+        dto.setOtherMethodContact(user.getOtherMethodContact());
+        dto.setRole(user.getRole());
+        dto.setCreatedDate(user.getCreatedDate());
+        dto.setUpdateDate(user.getUpdateDate());
+        dto.setLastLogin(user.getLastLogin());
+
+        // From TutorProfile
         dto.setTitle(user.getAcademicStatus() != null ? user.getAcademicStatus() : "Tutor");
 
         // Major information
@@ -29,7 +44,7 @@ public class TutorMapper {
             dto.setMajorId(user.getMajor().getId());
             dto.setMajorName(user.getMajor().getName());
 
-            // Department from major (faculty = department, no separate field)
+            // Department from major
             if (user.getMajor().getDepartment() != null) {
                 dto.setDepartment(user.getMajor().getDepartment().getName());
             }
@@ -48,7 +63,7 @@ public class TutorMapper {
             dto.setSpecializations(Collections.emptyList());
         }
 
-        dto.setRating(tutorProfile.getRating() != null ? tutorProfile.getRating().doubleValue() : null);
+        dto.setRating(tutorProfile.getRating() != null ? tutorProfile.getRating().doubleValue() : 0.0);
         dto.setReviewCount(0); // Can be calculated from feedback_student table
         dto.setStudentCount(tutorProfile.getTotalSessionsCompleted() != null ? tutorProfile.getTotalSessionsCompleted().intValue() : 0);
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : 0);

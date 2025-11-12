@@ -24,9 +24,15 @@ public class SessionMapper {
             dto.setTutorName(session.getTutor().getFirstName() + " " + session.getTutor().getLastName());
         }
 
-        // Map student name
-        if (session.getStudent() != null) {
-            dto.setStudentName(session.getStudent().getFirstName() + " " + session.getStudent().getLastName());
+        // Map student names from StudentSession
+        if (session.getStudentSessions() != null && !session.getStudentSessions().isEmpty()) {
+            dto.setStudentNames(
+                session.getStudentSessions().stream()
+                    .map(ss -> ss.getStudent().getFirstName() + " " + ss.getStudent().getLastName())
+                    .collect(Collectors.toList())
+            );
+        } else {
+            dto.setStudentNames(Collections.emptyList());
         }
 
         // Map subject name
@@ -38,7 +44,7 @@ public class SessionMapper {
         dto.setEndTime(session.getEndTime());
         dto.setFormat(session.getFormat());
         dto.setLocation(session.getLocation());
-        dto.setStatus(session.getStatus());
+        dto.setStatus(session.getSessionStatus() != null ? session.getSessionStatus().getName() : null);
         dto.setCreatedDate(session.getCreatedDate());
         dto.setUpdatedDate(session.getUpdatedDate());
 

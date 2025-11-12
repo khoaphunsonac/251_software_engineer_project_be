@@ -81,10 +81,10 @@ public class User {
     private Set<TutorSchedule> tutorSchedules = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "student")
-    private Set<Session> sessionss = new LinkedHashSet<>();
+    private Set<StudentSession> studentSessions = new LinkedHashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "status_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", nullable = false)
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)

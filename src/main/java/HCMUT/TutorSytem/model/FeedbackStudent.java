@@ -38,25 +38,13 @@ public class FeedbackStudent {
     @DecimalMax("5.0")
     private BigDecimal rating;
 
-    @Column(name = "content_quality", columnDefinition = "tinyint UNSIGNED")
-    private Short contentQuality;
-
-    @Column(name = "teaching_effectiveness", columnDefinition = "tinyint UNSIGNED")
-    private Short teachingEffectiveness;
-
-    @Column(name = "communication", columnDefinition = "tinyint UNSIGNED")
-    private Short communication;
-
     @Lob
     @Column(name = "comment")
     private String comment;
 
-    @Lob
-    @Column(name = "suggestion")
-    private String suggestion;
-
-    @Column(name = "would_recommend")
-    private Boolean wouldRecommend;
+    @ColumnDefault("0")
+    @Column(name = "would_recommend", nullable = false)
+    private Boolean wouldRecommend = false;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date", nullable = false)

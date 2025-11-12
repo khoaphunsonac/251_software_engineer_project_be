@@ -66,12 +66,17 @@ public class TutorServiceImp implements TutorService {
 
     @Override
     public TutorDTO createTutor(TutorRequest request) {
-        // Create a new user for the tutor
+        // Assuming the current authenticated user is creating the tutor profile
+        // TODO: Get current user from authentication context
+        // For now, this will throw an error - need to get userId from JWT token
+        // User user = getCurrentAuthenticatedUser();
+
+        // Temporary: If you need to specify userId, add it to TutorRequest
+        // For now, create a minimal user (this should be replaced with actual auth user)
         User user = new User();
         user.setRole("tutor");
-        user.setFirstName(request.getName().split(" ")[0]);
-        user.setLastName(request.getName().substring(request.getName().indexOf(" ") + 1));
-        user.setAcademicStatus(request.getTitle());
+        // Name comes from User datacore, not from request
+        // user.setFirstName, user.setLastName should be already set
 
         // Set major if provided
         if (request.getMajorId() != null) {
@@ -97,9 +102,9 @@ public class TutorServiceImp implements TutorService {
 
         tutorProfile.setExperienceYears(request.getExperienceYears() != null ? request.getExperienceYears().shortValue() : null);
         tutorProfile.setBio(request.getDescription());
-        tutorProfile.setRating(request.getRating() != null ? BigDecimal.valueOf(request.getRating()) : null);
-        tutorProfile.setTotalSessionsCompleted(request.getStudentCount() != null ? request.getStudentCount().longValue() : 0L);
-        tutorProfile.setIsAvailable(request.getIsAvailable() != null ? request.getIsAvailable() : true);
+        tutorProfile.setRating(BigDecimal.ZERO); // Auto set to 0, calculated from reviews
+        tutorProfile.setTotalSessionsCompleted(0L); // Auto set to 0
+        tutorProfile.setIsAvailable(true); // Auto set to true
 
         tutorProfile = tutorProfileRepository.save(tutorProfile);
         return tutorMapper.toDTO(tutorProfile);
@@ -110,21 +115,19 @@ public class TutorServiceImp implements TutorService {
         TutorProfile tutorProfile = tutorProfileRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + id));
 
-        User user = tutorProfile.getUser();
-        user.setFirstName(request.getName().split(" ")[0]);
-        user.setLastName(request.getName().substring(request.getName().indexOf(" ") + 1));
-        user.setAcademicStatus(request.getTitle());
+        // Cannot update User fields (from Datacore) - they are managed separately
+        // Only update TutorProfile specific fields
 
-        // Update major if provided
+        // Update major if provided (this might be allowed or not, depending on business logic)
+        User user = tutorProfile.getUser();
         if (request.getMajorId() != null) {
             Major major = majorRepository.findById(request.getMajorId())
                     .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
             user.setMajor(major);
+            userRepository.save(user);
         }
 
-        userRepository.save(user);
-
-        // Handle subjects - replace with subjects by IDs (ManyToMany)
+        // Handle subjects - only update if provided and not empty
         if (request.getSubjects() != null && !request.getSubjects().isEmpty()) {
             // Clear existing subjects
             tutorProfile.getSubjects().clear();
@@ -137,11 +140,23 @@ public class TutorServiceImp implements TutorService {
             }
         }
 
-        tutorProfile.setExperienceYears(request.getExperienceYears() != null ? request.getExperienceYears().shortValue() : null);
-        tutorProfile.setBio(request.getDescription());
-        tutorProfile.setRating(request.getRating() != null ? BigDecimal.valueOf(request.getRating()) : null);
-        tutorProfile.setTotalSessionsCompleted(request.getStudentCount() != null ? request.getStudentCount().longValue() : 0L);
-        tutorProfile.setIsAvailable(request.getIsAvailable() != null ? request.getIsAvailable() : true);
+        // Update TutorProfile fields - only if not null and not empty
+        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
+            user.setAcademicStatus(request.getTitle().trim());
+            userRepository.save(user);
+        }
+
+        if (request.getExperienceYears() != null) {
+            tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
+        }
+
+        if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
+            tutorProfile.setBio(request.getDescription().trim());
+        }
+
+        // Rating is calculated from reviews, cannot be manually updated
+        // isAvailable can be toggled by user (could add separate field in request if needed)
+        // Do not update: name, phone, dob, hcmutId, etc. (from Datacore)
 
         tutorProfile = tutorProfileRepository.save(tutorProfile);
         return tutorMapper.toDTO(tutorProfile);

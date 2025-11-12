@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "status",
+@Table(name = "user_status",
         uniqueConstraints = @UniqueConstraint(name = "uk_status_name", columnNames = "name"))
 @Data
 @NoArgsConstructor

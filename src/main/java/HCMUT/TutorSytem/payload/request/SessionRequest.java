@@ -7,12 +7,11 @@ import java.time.Instant;
 @Data
 public class SessionRequest {
     private Long tutorId;
-    private Long studentId;
     private Long subjectId;
     private Instant startTime;
     private Instant endTime;
     private String format;
     private String location;
-    private String status;
+    private Byte statusId; // sessionStatus.id (1=SCHEDULED, 2=IN_PROGRESS, 3=COMPLETED, 4=CANCELLED)
 }
 

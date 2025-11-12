@@ -38,6 +38,13 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.PUT, "/tutors/**").hasRole("TUTOR");  // Tutor owner can update (checked in controller)
                     request.requestMatchers(HttpMethod.DELETE, "/tutors/**").hasRole("TUTOR");  // Tutor owner can delete (checked in controller)
 
+                    // Lookup/Reference endpoints (public for form dropdowns)
+                    request.requestMatchers(HttpMethod.GET, "/subjects").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/departments").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/majors/**").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
+
                     // Default: require authentication for other requests
                     request.anyRequest().authenticated();
                 })

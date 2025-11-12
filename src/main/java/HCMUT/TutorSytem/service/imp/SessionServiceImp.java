@@ -5,10 +5,12 @@ import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
 import HCMUT.TutorSytem.model.Session;
+import HCMUT.TutorSytem.model.SessionStatus;
 import HCMUT.TutorSytem.model.Subject;
 import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
 import HCMUT.TutorSytem.repo.SessionRepository;
+import HCMUT.TutorSytem.repo.SessionStatusRepository;
 import HCMUT.TutorSytem.repo.SubjectRepository;
 import HCMUT.TutorSytem.repo.UserRepository;
 import HCMUT.TutorSytem.service.SessionService;
@@ -33,6 +35,9 @@ public class SessionServiceImp implements SessionService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    private SessionStatusRepository sessionStatusRepository;
 
     @Autowired
     private SessionMapper sessionMapper;
@@ -70,12 +75,7 @@ public class SessionServiceImp implements SessionService {
             session.setTutor(tutor);
         }
 
-        // Set student
-        if (request.getStudentId() != null) {
-            User student = userRepository.findById(request.getStudentId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + request.getStudentId()));
-            session.setStudent(student);
-        }
+        // Students will register later through StudentSession table (N-N relationship)
 
         // Set subject
         if (request.getSubjectId() != null) {
@@ -88,7 +88,13 @@ public class SessionServiceImp implements SessionService {
         session.setEndTime(request.getEndTime());
         session.setFormat(request.getFormat());
         session.setLocation(request.getLocation());
-        session.setStatus(request.getStatus() != null ? request.getStatus() : "scheduled");
+
+        // Set status - default to SCHEDULED (id=1) if not provided
+        Byte statusId = request.getStatusId() != null ? request.getStatusId() : SessionStatus.SCHEDULED;
+        SessionStatus sessionStatus = sessionStatusRepository.findById(statusId)
+                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + statusId));
+        session.setSessionStatus(sessionStatus);
+
         session.setCreatedDate(Instant.now());
 
         session = sessionRepository.save(session);
@@ -107,12 +113,7 @@ public class SessionServiceImp implements SessionService {
             session.setTutor(tutor);
         }
 
-        // Update student if provided
-        if (request.getStudentId() != null) {
-            User student = userRepository.findById(request.getStudentId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + request.getStudentId()));
-            session.setStudent(student);
-        }
+        // Student list is managed through StudentSession table, not updated here
 
         // Update subject if provided
         if (request.getSubjectId() != null) {
@@ -121,11 +122,31 @@ public class SessionServiceImp implements SessionService {
             session.setSubject(subject);
         }
 
-        if (request.getStartTime() != null) session.setStartTime(request.getStartTime());
-        if (request.getEndTime() != null) session.setEndTime(request.getEndTime());
-        if (request.getFormat() != null) session.setFormat(request.getFormat());
-        if (request.getLocation() != null) session.setLocation(request.getLocation());
-        if (request.getStatus() != null) session.setStatus(request.getStatus());
+        // Only update non-null fields
+        if (request.getStartTime() != null) {
+            session.setStartTime(request.getStartTime());
+        }
+
+        if (request.getEndTime() != null) {
+            session.setEndTime(request.getEndTime());
+        }
+
+        // Only update non-null and non-empty strings
+        if (request.getFormat() != null && !request.getFormat().trim().isEmpty()) {
+            session.setFormat(request.getFormat().trim());
+        }
+
+        if (request.getLocation() != null && !request.getLocation().trim().isEmpty()) {
+            session.setLocation(request.getLocation().trim());
+        }
+
+        // Only update status if provided
+        if (request.getStatusId() != null) {
+            SessionStatus sessionStatus = sessionStatusRepository.findById(request.getStatusId())
+                    .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + request.getStatusId()));
+            session.setSessionStatus(sessionStatus);
+        }
+
         session.setUpdatedDate(Instant.now());
 
         session = sessionRepository.save(session);
