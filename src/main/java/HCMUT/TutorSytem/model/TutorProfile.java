@@ -9,6 +9,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,8 +29,13 @@ public class TutorProfile {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "subject")
-    private String subject;
+    @ManyToMany
+    @JoinTable(
+            name = "tutor_profile_subject",
+            joinColumns = @JoinColumn(name = "tutor_profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<Subject> subjects = new ArrayList<>();
 
     @Column(name = "experience_years", columnDefinition = "tinyint UNSIGNED")
     private Short experienceYears;

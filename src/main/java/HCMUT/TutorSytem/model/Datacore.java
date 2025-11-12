@@ -39,9 +39,6 @@ public class Datacore {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(name = "faculty", length = 100)
-    private String faculty;
-
     @Column(name = "academic_status", length = 100)
     private String academicStatus;
 
@@ -53,5 +50,13 @@ public class Datacore {
 
     @Column(name = "other_method_contact")
     private String otherMethodContact;
+
+    @OneToOne(mappedBy = "datacore")
+    private HcmutSso hcmutSso;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id",
+            foreignKey = @ForeignKey(name = "fk_datacore_major"))
+    private Major major;
 
 }

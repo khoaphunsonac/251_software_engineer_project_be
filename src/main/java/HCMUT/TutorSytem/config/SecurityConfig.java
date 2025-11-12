@@ -1,6 +1,7 @@
 package HCMUT.TutorSytem.config;
 
 
+import HCMUT.TutorSytem.filter.AuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,19 +22,34 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthorizationFilter authorizationFilter) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection
                 .authorizeHttpRequests(request -> {
-                    request.anyRequest().permitAll();
+                    // Session endpoints
+                    request.requestMatchers(HttpMethod.GET, "/sessions").permitAll();  // Anyone can view sessions
+                    request.requestMatchers(HttpMethod.POST, "/sessions").hasRole("TUTOR");  // Only tutors can create sessions
+                    request.requestMatchers(HttpMethod.PUT, "/sessions/**").hasRole("TUTOR");  // Tutor owner can update (checked in controller)
+                    request.requestMatchers(HttpMethod.DELETE, "/sessions/**").hasRole("TUTOR");  // Tutor owner can delete (checked in controller)
+
+                    // Tutor endpoints
+                    request.requestMatchers(HttpMethod.GET, "/tutors").permitAll();  // Anyone can view tutors
+                    request.requestMatchers(HttpMethod.POST, "/tutors").permitAll();  // Anyone can register as tutor
+                    request.requestMatchers(HttpMethod.PUT, "/tutors/**").hasRole("TUTOR");  // Tutor owner can update (checked in controller)
+                    request.requestMatchers(HttpMethod.DELETE, "/tutors/**").hasRole("TUTOR");  // Tutor owner can delete (checked in controller)
+
+                    // Lookup/Reference endpoints (public for form dropdowns)
+                    request.requestMatchers(HttpMethod.GET, "/subjects").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/departments").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/majors/**").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
+
+                    // Default: require authentication for other requests
+                    request.anyRequest().authenticated();
                 })
-//                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
-
     }
-
 
 }

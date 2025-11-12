@@ -24,4 +24,7 @@ public class HcmutSso {
     @Column(name = "hcmut_id", nullable = false, length = 50)
     private String hcmutId;
 
+    @OneToOne
+    @JoinColumn(name = "hcmut_id", referencedColumnName = "hcmut_id", insertable = false, updatable = false)
+    private Datacore datacore;
 }

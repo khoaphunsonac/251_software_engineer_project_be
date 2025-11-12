@@ -25,12 +25,11 @@ public class Session {
     private User tutor;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
+
+    @OneToMany(mappedBy = "session")
+    private Set<StudentSession> studentSessions = new LinkedHashSet<>();
 
     @Column(name = "start_time", nullable = false)
     private Instant startTime;
@@ -44,8 +43,9 @@ public class Session {
     @Column(name = "location")
     private String location;
 
-    @Column(name = "status", length = 50)
-    private String status;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "status_id", nullable = false)
+    private SessionStatus sessionStatus;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date", nullable = false)
