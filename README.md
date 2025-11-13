@@ -1,3 +1,10 @@
+# TutorSystem Backend
+
+## 📖 Tài liệu cho Frontend Developer
+👉 **[Hướng dẫn chạy Backend cho team Frontend (README_FE.md)](./README_FE.md)**
+
+---
+
 ## How to setup Docker on Ubuntu
 ```bash
 # Add Docker's official GPG key:
@@ -30,3 +37,4 @@ docker -v
 -   Step 1: Open DBeaver -> New Connection --> Choose MySQL
 -   Step 2: Change port from 3306 to 3307
 -   Step 3: Click at Driver properties, find allowPublicKeyRetrieval, change from false to true 
+
