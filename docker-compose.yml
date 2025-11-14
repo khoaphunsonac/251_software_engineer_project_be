@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8.0.44
+    image: mysql
     container_name: tutor_system_db
     restart: always
     environment:
