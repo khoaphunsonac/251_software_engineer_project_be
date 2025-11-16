@@ -272,11 +272,15 @@ POST /auth/login
 **Body:**
 ```json
 {
-  "username": "string",
+  "email": "string",
   "password": "string"
 }
 ```
 **Response:** Token trong `data`
+
+Lưu ý: Password đã được mã hoá sẽ được lưu trong database dưới dạng mã Hash thông qua **BcCrypt** với cost là **12**.. 
+
+TODO: Convert password :String sang Hash: String tự động và lưu vào bảng **hcmut_ssp** cột **Password** . 
 
 ---
 
