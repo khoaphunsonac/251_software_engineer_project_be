@@ -53,11 +53,9 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
 
-                    // Login endpoint
-                    // ⚠️ bỏ khoảng trắng thừa ở cuối
-                    request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
-
-                    // Default
+                    //Login endpoint
+                    request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll(); // Anyone can attempt to login
+                    // Default: require authentication for other requests
                     request.anyRequest().authenticated();
                 })
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)

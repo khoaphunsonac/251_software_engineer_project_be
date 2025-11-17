@@ -41,6 +41,10 @@ app:
   jwt:
     secret: gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=
     expiration: 43200000
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:3000
 
 
 ---
@@ -68,6 +72,3 @@ server:
       enabled: true
       force: true
 
-app:
-  cors:
-    allowed-origins: "*"
