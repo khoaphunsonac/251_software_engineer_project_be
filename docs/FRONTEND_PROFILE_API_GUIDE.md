@@ -23,7 +23,7 @@ Tất cả API trả về theo format:
 **Quyền:** Student chỉ xem được profile của chính mình
 
 **Response data (StudentDTO):**
-- `id`: Long
+- `id`: Int
 - `hcmutId`: String
 - `firstName`: String
 - `lastName`: String
@@ -33,7 +33,7 @@ Tất cả API trả về theo format:
 - `phone`: String
 - `otherMethodContact`: String
 - `role`: String
-- `majorId`: Long
+- `majorId`: Int
 - `majorName`: String
 - `department`: String
 - `createdDate`: String (ISO 8601)
@@ -50,8 +50,8 @@ Tất cả API trả về theo format:
 **Quyền:** Student chỉ xem được lịch sử của chính mình
 
 **Response data:** Array of StudentSessionHistoryDTO
-- `studentSessionId`: Long
-- `sessionId`: Long
+- `studentSessionId`: Int
+- `sessionId`: Int
 - `tutorName`: String
 - `subjectName`: String
 - `subjectCode`: String
@@ -83,7 +83,7 @@ Tất cả API trả về theo format:
 - `dob`: String - format "YYYY-MM-DD" (optional)
 - `phone`: String (optional)
 - `otherMethodContact`: String (optional)
-- `majorId`: Long (optional)
+- `majorId`: Int (optional)
 
 **Lưu ý:** Tất cả fields đều optional, chỉ gửi những field cần update
 
@@ -104,7 +104,7 @@ Tất cả API trả về theo format:
 
 **Response data (PageDTO):**
 - `content`: Array of TutorDTO
-  - `id`: Long
+  - `id`: Int
   - `hcmutId`: String
   - `firstName`: String
   - `lastName`: String
@@ -118,7 +118,7 @@ Tất cả API trả về theo format:
   - `updateDate`: String (ISO 8601)
   - `lastLogin`: String (ISO 8601)
   - `title`: String
-  - `majorId`: Long
+  - `majorId`: Int
   - `majorName`: String
   - `department`: String
   - `description`: String
@@ -146,7 +146,7 @@ Tất cả API trả về theo format:
 **Quyền:** Tutor chỉ xem được profile chi tiết của chính mình
 
 **Response data (TutorDetailDTO):**
-- `id`: Long
+- `id`: Int
 - `hcmutId`: String
 - `firstName`: String
 - `lastName`: String
@@ -159,20 +159,20 @@ Tất cả API trả về theo format:
 - `createdDate`: String (ISO 8601)
 - `updateDate`: String (ISO 8601)
 - `lastLogin`: String (ISO 8601)
-- `tutorProfileId`: Long
-- `majorId`: Long
+- `tutorProfileId`: Int
+- `majorId`: Int
 - `majorName`: String
 - `department`: String
 - `bio`: String
 - `subjects`: Array of SubjectDTO
-  - `id`: Long
+  - `id`: Int
   - `name`: String
 - `rating`: Number (BigDecimal)
 - `experienceYears`: Number
-- `totalSessionsCompleted`: Long
+- `totalSessionsCompleted`: Int
 - `isAvailable`: Boolean
 - `schedules`: Array of TutorScheduleDTO (lịch dạy)
-  - `id`: Long
+  - `id`: Int
   - `dayOfWeek`: Number (0=Chủ Nhật, 1=Thứ 2, ..., 6=Thứ 7)
   - `startTime`: String (format: "HH:mm:ss")
   - `endTime`: String (format: "HH:mm:ss")
@@ -199,9 +199,9 @@ Tất cả API trả về theo format:
 - `dob`: String - format "YYYY-MM-DD" (optional)
 - `phone`: String (optional)
 - `otherMethodContact`: String (optional)
-- `majorId`: Long (optional)
+- `majorId`: Int (optional)
 - `bio`: String (optional)
-- `subjectIds`: Array of Long (optional)
+- `subjectIds`: Array of Int (optional)
 - `experienceYears`: Number (optional)
 - `isAvailable`: Boolean (optional)
 

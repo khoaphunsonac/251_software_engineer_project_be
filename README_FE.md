@@ -254,7 +254,7 @@ GET /majors
 ```
 GET /majors/by-department/{departmentId}
 ```
-**Params:** `departmentId` (Long)
+**Params:** `departmentId` (Int)
 **Response:** Danh sách `MajorDTO[]`
 
 #### 4. Lấy danh sách khoa

@@ -170,7 +170,7 @@ if (request.getExperienceYears() != null) {
 // List fields - null + empty check
 if (request.getSubjects() != null && !request.getSubjects().isEmpty()) {
     tutorProfile.getSubjects().clear();
-    for (Long subjectId : request.getSubjects()) {
+    for (Int subjectId : request.getSubjects()) {
         Subject subject = subjectRepository.findById(subjectId)
             .orElseThrow(() -> new DataNotFoundExceptions("Subject not found"));
         tutorProfile.getSubjects().add(subject);
