@@ -83,6 +83,19 @@ public class StudentServiceImp implements StudentService {
                     .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
             user.setMajor(major);
         }
+        if(request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
+        if(request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
+        if(request.getProfileImage() != null) {
+            user.setProfileImage(request.getProfileImage());
+        }
+        if(request.getAcademicStatus() != null) {
+            user.setAcademicStatus(request.getAcademicStatus());
+        }
 
         user = userRepository.save(user);
         return StudentMapper.toStudentDTO(user);
