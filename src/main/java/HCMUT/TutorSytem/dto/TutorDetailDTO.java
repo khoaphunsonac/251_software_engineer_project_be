@@ -40,5 +40,5 @@ public class TutorDetailDTO {
     private TutorStatus status;
 
     // Teaching schedule
-    private List<TutorScheduleDTO> schedules;
+    private List<ScheduleDTO> schedules;
 }
