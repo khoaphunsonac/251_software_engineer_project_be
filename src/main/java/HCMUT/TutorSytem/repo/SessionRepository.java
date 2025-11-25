@@ -37,4 +37,14 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
      * Tìm sessions theo tutor ID
      */
     List<Session> findByTutorId(Integer tutorId);
+
+        /**
+         * Find tutor sessions within a specific time range with a given session status id.
+         */
+        @Query("SELECT s FROM Session s WHERE s.tutor.id = :tutorId AND s.sessionStatus.id = :statusId " +
+            "AND s.startTime >= :start AND s.startTime < :end")
+        List<Session> findTutorScheduledSessionsInWeek(@Param("tutorId") Integer tutorId,
+                                 @Param("statusId") Byte statusId,
+                                 @Param("start") Instant start,
+                                 @Param("end") Instant end);
 }

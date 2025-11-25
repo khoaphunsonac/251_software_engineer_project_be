@@ -27,7 +27,11 @@ public interface StudentSessionRepository extends JpaRepository<StudentSession, 
      * @param statusId ID của status (PENDING = 1)
      * @return Danh sách StudentSession đang chờ duyệt
      */
-    @Query("SELECT ss FROM StudentSession ss WHERE ss.session.tutor.id = :tutorId AND ss.studentSessionStatus.id = :statusId")
-    List<StudentSession> findPendingSessionsByTutorId(@Param("tutorId") Integer tutorId, @Param("statusId") Byte statusId);
+        @Query("SELECT ss FROM StudentSession ss WHERE ss.session.tutor.id = :tutorId AND ss.studentSessionStatus.id = :statusId")
+        List<StudentSession> findPendingSessionsByTutorId(@Param("tutorId") Integer tutorId, @Param("statusId") Byte statusId);
+
+        @Query(value = "SELECT ss FROM StudentSession ss WHERE ss.session.tutor.id = :tutorId AND ss.studentSessionStatus.id = :statusId",
+            countQuery = "SELECT count(ss) FROM StudentSession ss WHERE ss.session.tutor.id = :tutorId AND ss.studentSessionStatus.id = :statusId")
+        org.springframework.data.domain.Page<StudentSession> findPendingSessionsByTutorId(@Param("tutorId") Integer tutorId, @Param("statusId") Byte statusId, org.springframework.data.domain.Pageable pageable);
 }
 
