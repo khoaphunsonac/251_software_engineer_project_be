@@ -1,4 +1,4 @@
-package HCMUT.TutorSytem.model;
+package HCMUT.TutorSytem.Enum;
 
 /**
  * Registration status of a tutor profile.
