@@ -1,92 +1,95 @@
 package HCMUT.TutorSytem.controller;
 
-import HCMUT.TutorSytem.dto.*;
-import HCMUT.TutorSytem.mapper.TutorProfileResponseMapper;
-import HCMUT.TutorSytem.model.TutorProfile;
+import HCMUT.TutorSytem.dto.SessionDTO;
+import HCMUT.TutorSytem.dto.StudentDTO;
+import HCMUT.TutorSytem.dto.TutorDetailDTO;
+import HCMUT.TutorSytem.dto.UserDTO;
 import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
 import HCMUT.TutorSytem.service.AdminService;
-import HCMUT.TutorSytem.service.TutorProfileService;
-import HCMUT.TutorSytem.util.PaginationUtil;
 import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
-    private static final int PAGE_SIZE = 10;
-
-    @Autowired
-    private TutorProfileService tutorProfileService;
-
     @Autowired
     private AdminService adminService;
 
-
     /**
-     * Admin: Soft delete user profile (set status to INACTIVE)
-     * Tự động xác định user là student hay tutor dựa trên role trong database
+     * Admin: Update student profile
      */
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<BaseResponse> deleteUserProfile(@PathVariable Integer userId) {
-        // Lấy thông tin user để xác định role
-        adminService.deleteUserProfile(userId);
-
+    @PutMapping("/students/{userId}")
+    public ResponseEntity<BaseResponse> updateStudentProfile(
+            @PathVariable Integer userId,
+            @RequestBody StudentProfileUpdateRequest request) {
+        StudentDTO studentDTO = adminService.updateStudentProfileByAdmin(userId, request);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("User profile deactivated successfully by admin");
+        response.setMessage("Student profile updated successfully by admin");
+        response.setData(studentDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Admin: Soft delete student profile (set status to INACTIVE)
+     */
+    @DeleteMapping("/students/{userId}")
+    public ResponseEntity<BaseResponse> deleteStudentProfile(@PathVariable Integer userId) {
+        adminService.deleteStudentProfile(userId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Student profile deactivated successfully by admin");
         response.setData(null);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Admin: Get All Users (with pagination)
-     * Mặc định: 10 items per page
-     *
-     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
+     * Admin: Update tutor profile
      */
-    @GetMapping("/users")
-    public ResponseEntity<BaseResponse> getAllUsers(@RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 10);
-        Page<UserDTO> usersPage = adminService.getAllUsers(pageable);
-        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(usersPage);
-
+    @PutMapping("/tutors/{userId}")
+    public ResponseEntity<BaseResponse> updateTutorProfile(
+            @PathVariable Integer userId,
+            @RequestBody TutorProfileUpdateRequest request) {
+        TutorDetailDTO tutorDetail = adminService.updateTutorProfileByAdmin(userId, request);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Users retrieved successfully");
-        response.setData(paginatedData);
+        response.setMessage("Tutor profile updated successfully by admin");
+        response.setData(tutorDetail);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Admin: Lấy danh sách các session đang chờ duyệt (with pagination)
-     * Chỉ lấy các session có status = PENDING
-     * Mặc định: 10 items per page
-     *
-     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
+     * Admin: Soft delete tutor profile (set status to INACTIVE)
      */
-    @GetMapping("/sessions/pending")
-    public ResponseEntity<BaseResponse> getPendingSessions(@RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<SessionDTO> pendingSessionsPage = adminService.getPendingSessions(pageable);
-        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(pendingSessionsPage);
-
+    @DeleteMapping("/tutors/{userId}")
+    public ResponseEntity<BaseResponse> deleteTutorProfile(@PathVariable Integer userId) {
+        adminService.deleteTutorProfile(userId);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Pending sessions retrieved successfully");
-        response.setData(paginatedData);
+        response.setMessage("Tutor profile deactivated successfully by admin");
+        response.setData(null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Admin: Get All Users (without pagination)
+     */
+    @GetMapping("/users")
+    public ResponseEntity<BaseResponse> getAllUsers() {
+        List<UserDTO> users = adminService.getAllUsers();
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Users retrieved successfully");
+        response.setData(users);
         return ResponseEntity.ok(response);
     }
 
@@ -129,43 +132,6 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/tutor/pending")
-
-    public ResponseEntity<BaseResponse> getPendingTutors(@RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<TutorProfileResponse> pendingProfiles = tutorProfileService.getPendingTutorProfiles(pageable);
-
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Fetched pending tutor profiles successfully");
-        response.setData(pendingProfiles);
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{userId}/approve")
-
-    public ResponseEntity<BaseResponse> approveTutorByUserId(@PathVariable Integer userId) {
-        TutorProfile updated = tutorProfileService.approveTutorProfile(userId);
-        TutorProfileResponse data = TutorProfileResponseMapper.toResponse(updated);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Tutor profile approved successfully");
-        response.setData(data);
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{userId}/reject")
-
-    public ResponseEntity<BaseResponse> rejectTutorByUserId(@PathVariable Integer userId) {
-        TutorProfile updated = tutorProfileService.rejectTutorProfile(userId);
-        TutorProfileResponse data = TutorProfileResponseMapper.toResponse(updated);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Tutor profile rejected successfully");
-        response.setData(data);
-        return ResponseEntity.ok(response);
-    }
-
     /**
      * Helper method để lấy user ID từ authentication
      */
@@ -173,3 +139,4 @@ public class AdminController {
         return (Integer) authentication.getPrincipal();
     }
 }
+

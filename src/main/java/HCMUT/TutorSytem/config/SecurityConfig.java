@@ -33,44 +33,25 @@ public class SecurityConfig {
                 // 🔹 RẤT QUAN TRỌNG: bật hỗ trợ CORS trong Spring Security
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> {
-                    // 1. OPTIONS (preflight) - LUÔN ĐẦU TIÊN
+                    // 🔹 Cho phép toàn bộ OPTIONS (preflight)
                     request.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
 
-                    // 2. Login endpoint - PUBLIC
-                    request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
-
-                    // 3. ADMIN endpoints
-                    request.requestMatchers("/admin/**").hasRole("ADMIN");
-
-                    // 4. TUTOR endpoints CỤ THỂ (ĐẶT TRƯỚC /tutors chung)
-                    // GET endpoints riêng cho tutor owner
-                    request.requestMatchers(HttpMethod.GET, "/tutors/profile/**").hasRole("TUTOR");
-                    request.requestMatchers(HttpMethod.GET, "/tutors/pending-registrations").hasRole("TUTOR");
-                    request.requestMatchers(HttpMethod.GET, "/tutors/schedule/**").hasRole("TUTOR");
-//                    // POST /tutors để đăng ký làm tutor - PUBLIC
-//                    request.requestMatchers(HttpMethod.POST, "/tutors").permitAll(); --> Authenticated()
-                    // PUT/DELETE tutors cho tutor owner
-                    request.requestMatchers(HttpMethod.PUT, "/tutors/**").hasRole("TUTOR");
-                    request.requestMatchers(HttpMethod.DELETE, "/tutors/**").hasRole("TUTOR");
-
-                    // 5. TUTOR general endpoints - PUBLIC
-                    // GET /tutors - danh sách tutor public
-                    request.requestMatchers(HttpMethod.GET, "/tutors").permitAll();
-
-                    // 6. SESSION endpoints
+                    // Session endpoints
                     request.requestMatchers(HttpMethod.GET, "/sessions").permitAll();
                     request.requestMatchers(HttpMethod.POST, "/sessions").hasRole("TUTOR");
                     request.requestMatchers(HttpMethod.PUT, "/sessions/**").hasRole("TUTOR");
                     request.requestMatchers(HttpMethod.DELETE, "/sessions/**").hasRole("TUTOR");
 
-//                    // 7. STUDENT endpoints
-//                    // Bảo vệ tất cả /students/** endpoints với role STUDENT
-//                    request.requestMatchers("/students/**").hasRole("STUDENT");
+                    // Tutor endpoints
+                    request.requestMatchers(HttpMethod.GET, "/tutors").permitAll();
+                    request.requestMatchers(HttpMethod.POST, "/tutors").permitAll();
+                    request.requestMatchers(HttpMethod.PUT, "/tutors/**").hasRole("TUTOR");
+                    request.requestMatchers(HttpMethod.DELETE, "/tutors/**").hasRole("TUTOR");
 
-                    // 8. Lookup/Reference endpoints - PUBLIC
+                    // Lookup/Reference endpoints
                     request.requestMatchers(HttpMethod.GET, "/subjects").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/departments").permitAll();
-                    request.requestMatchers(HttpMethod.GET, "/majors/**").permitAll();
+                    request.requestMatchers(HttpMethod.GET, "/majors").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
 
@@ -79,8 +60,9 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.PATCH, "/api/admin/tutor_profiles/**").hasRole("admin");
                     request.requestMatchers(HttpMethod.GET, "/api/admin/tutor_profiles/**").hasRole("admin");
 
-                    // 9. Default - AUTHENTICATED
-                    // Tất cả requests khác yêu cầu authentication
+                    //Login endpoint
+                    request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll(); // Anyone can attempt to login
+                    // Default: require authentication for other requests
                     request.anyRequest().authenticated();
                 })
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)

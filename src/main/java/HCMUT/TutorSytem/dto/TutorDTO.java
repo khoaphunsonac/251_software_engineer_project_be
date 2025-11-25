@@ -1,10 +1,6 @@
 package HCMUT.TutorSytem.dto;
 
-<<<<<<< HEAD
-import HCMUT.TutorSytem.Enum.TutorStatus;
-=======
 import HCMUT.TutorSytem.model.TutorStatus;
->>>>>>> main
 import lombok.Data;
 
 import java.time.Instant;

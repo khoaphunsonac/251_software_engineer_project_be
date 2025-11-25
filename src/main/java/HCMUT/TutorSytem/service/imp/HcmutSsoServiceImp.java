@@ -35,10 +35,8 @@ public class HcmutSsoServiceImp implements HcmutSsoService {
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with email: " + email));
         if(passwordEncoder.matches(password, user.getPassword())){
             Datacore data = user.getDatacore();
-//            System.out.println("Datacore data: " + data);
             Integer userID = userService.getInfoFromHcmutSystem(data);
-            String roleName = data.getRole().getName().toUpperCase();
-            return jwtHelper.generateToken(String.valueOf(userID), roleName);
+            return jwtHelper.generateToken(String.valueOf(userID), data.getRole().getName());
         } else {
             throw new MethodNotAllowExceptions("Invalid password for user with email: " + email);
         }
