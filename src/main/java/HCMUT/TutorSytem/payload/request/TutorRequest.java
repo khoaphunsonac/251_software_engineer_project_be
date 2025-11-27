@@ -11,7 +11,6 @@ public class TutorRequest {
     private String description;
     private List<Integer> subjects; // List of subject IDs from frontend
     private Integer experienceYears;
-    private Integer userId; // ID of the user creating the tutor profile (frontend should send this)
     // rating: auto calculated from reviews
     // isAvailable: auto set to true
     // name, phone, etc.: from User (Datacore)

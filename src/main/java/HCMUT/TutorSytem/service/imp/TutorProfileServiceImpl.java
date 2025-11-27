@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.service.imp;
 
+import HCMUT.TutorSytem.Enum.TutorStatus;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.dto.TutorProfileResponse;
 import HCMUT.TutorSytem.exception.BadRequestException;
@@ -10,7 +11,6 @@ import HCMUT.TutorSytem.mapper.TutorProfileResponseMapper;
 import HCMUT.TutorSytem.model.Major;
 import HCMUT.TutorSytem.model.Subject;
 import HCMUT.TutorSytem.model.TutorProfile;
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.TutorProfileCreateRequest;
 import HCMUT.TutorSytem.repo.MajorRepository;
@@ -25,11 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service

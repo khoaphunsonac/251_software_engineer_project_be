@@ -1,8 +1,6 @@
 package HCMUT.TutorSytem.service.imp;
 
 import HCMUT.TutorSytem.dto.SessionDTO;
-import HCMUT.TutorSytem.dto.StudentDTO;
-import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.dto.UserDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
@@ -11,24 +9,15 @@ import HCMUT.TutorSytem.model.Session;
 import HCMUT.TutorSytem.model.SessionStatus;
 import HCMUT.TutorSytem.model.Status;
 import HCMUT.TutorSytem.model.User;
-import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
-import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
-import HCMUT.TutorSytem.repo.SessionRepository;
-import HCMUT.TutorSytem.repo.SessionStatusRepository;
-import HCMUT.TutorSytem.repo.StatusRepository;
-import HCMUT.TutorSytem.repo.TutorProfileRepository;
-import HCMUT.TutorSytem.repo.UserRepository;
+import HCMUT.TutorSytem.repo.*;
 import HCMUT.TutorSytem.service.AdminService;
 import HCMUT.TutorSytem.service.StudentService;
 import HCMUT.TutorSytem.service.TutorService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminServiceImp implements AdminService {
@@ -57,16 +46,9 @@ public class AdminServiceImp implements AdminService {
 
     @Override
     @Transactional
-    public StudentDTO updateStudentProfileByAdmin(Integer userId, StudentProfileUpdateRequest request) {
-        // Admin can update any student profile
-        return studentService.updateStudentProfile(userId, request);
-    }
-
-    @Override
-    @Transactional
-    public void deleteStudentProfile(Integer userId) {
+    public void deleteUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
         // Soft delete: set status to INACTIVE
         Status inactiveStatus = statusRepository.findByName("INACTIVE")
@@ -74,66 +56,16 @@ public class AdminServiceImp implements AdminService {
 
         user.setStatus(inactiveStatus);
         userRepository.save(user);
-    }
 
-    @Override
-    @Transactional
-    public TutorDetailDTO updateTutorProfileByAdmin(Integer userId, TutorProfileUpdateRequest request) {
-        // Admin can update any tutor profile
-        return tutorService.updateTutorProfile(userId, request);
-    }
-
-    @Override
-    @Transactional
-    public void deleteTutorProfile(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + userId));
-
-        // Check if tutor profile exists
-        tutorProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
-
-        // Soft delete: set status to INACTIVE
-        Status inactiveStatus = statusRepository.findByName("INACTIVE")
-                .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
-
-        user.setStatus(inactiveStatus);
-        userRepository.save(user);
+        // Log để biết đã xóa user nào (student hay tutor)
+        String userType = user.getRole() != null ? user.getRole() : "Unknown";
+        System.out.println("Admin deleted user profile - UserId: " + userId + ", Role: " + userType);
     }
 
     @Override
     public Page<UserDTO> getAllUsers(Pageable pageable) {
         Page<User> usersPage = userRepository.findAll(pageable);
         return usersPage.map(UserMapper::toDTO);
-    }
-
-    @Override
-    @Transactional
-    public void deleteUserProfile(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
-
-        String role = user.getRole();
-        if (role == null) {
-            // default to soft delete
-            Status inactiveStatus = statusRepository.findByName("INACTIVE")
-                    .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
-            user.setStatus(inactiveStatus);
-            userRepository.save(user);
-            return;
-        }
-
-        if (role.equalsIgnoreCase("STUDENT")) {
-            deleteStudentProfile(userId);
-        } else if (role.equalsIgnoreCase("TUTOR")) {
-            deleteTutorProfile(userId);
-        } else {
-            // For other roles (ADMIN etc.) still allow soft delete
-            Status inactiveStatus = statusRepository.findByName("INACTIVE")
-                    .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
-            user.setStatus(inactiveStatus);
-            userRepository.save(user);
-        }
     }
 
     @Override
@@ -182,8 +114,11 @@ public class AdminServiceImp implements AdminService {
 
     @Override
     public Page<SessionDTO> getPendingSessions(Pageable pageable) {
-        Page<Session> page = sessionRepository.findBySessionStatusId(SessionStatus.PENDING, pageable);
-        return page.map(SessionMapper::toDTO);
+        // Lấy các session có status = PENDING (id = 1)
+        Page<Session> pendingSessionsPage = sessionRepository.findBySessionStatusId(SessionStatus.PENDING, pageable);
+
+        // Map sang SessionDTO
+        return pendingSessionsPage.map(SessionMapper::toDTO);
     }
 }
 

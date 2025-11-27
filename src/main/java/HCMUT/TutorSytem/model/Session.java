@@ -2,7 +2,6 @@ package HCMUT.TutorSytem.model;
 
 import HCMUT.TutorSytem.Enum.DayOfWeek;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;

@@ -1,23 +1,23 @@
 package HCMUT.TutorSytem.service.imp;
 
-import HCMUT.TutorSytem.dto.*;
+import HCMUT.TutorSytem.dto.SessionDTO;
+import HCMUT.TutorSytem.dto.StudentSessionDTO;
+import HCMUT.TutorSytem.dto.TutorDTO;
+import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.StudentSessionMapper;
 import HCMUT.TutorSytem.mapper.TutorDetailMapper;
 import HCMUT.TutorSytem.mapper.TutorMapper;
 import HCMUT.TutorSytem.model.*;
-import HCMUT.TutorSytem.Enum.TutorStatus; // Import TutorStatus (Giả định vị trí)
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
-import HCMUT.TutorSytem.payload.request.TutorRequest; // Import TutorRequest
 import HCMUT.TutorSytem.repo.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import HCMUT.TutorSytem.service.TutorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal; // Import BigDecimal
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,119 +59,9 @@ public class TutorServiceImp implements TutorService {
         Page<TutorProfile> tutorProfilesPage = tutorProfileRepository.findAll(pageable);
         return tutorProfilesPage.map(TutorMapper::toDTO);
     }
-    
-    // PHƯƠNG THỨC THIẾU ĐƯỢC THÊM VÀO (GIẢ ĐỊNH LOGIC TỪ CODE BỊ LỖI BAN ĐẦU)
-    @Override
-    @Transactional
-    public TutorDTO createTutor(TutorRequest request) {
-        User user = userRepository.findById(request.getUserId()) // Cần có userId trong request
-                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + request.getUserId()));
 
-        // Set major if provided
-        if (request.getMajorId() != null) {
-            Major major = majorRepository.findById(request.getMajorId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
-            user.setMajor(major);
-        }
 
-        user = userRepository.save(user);
 
-        // Create tutor profile
-        TutorProfile tutorProfile = new TutorProfile();
-        tutorProfile.setUser(user);
-
-        // Handle subjects - link by subject IDs (ManyToMany)
-        if (request.getSubjects() != null && !request.getSubjects().isEmpty()) {
-            for (Integer subjectId : request.getSubjects()) {
-                Subject subject = subjectRepository.findById(subjectId)
-                        .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
-                tutorProfile.getSubjects().add(subject);
-            }
-        }
-
-        tutorProfile.setExperienceYears(request.getExperienceYears() != null ? request.getExperienceYears().shortValue() : null);
-        tutorProfile.setBio(request.getDescription());
-        tutorProfile.setRating(BigDecimal.ZERO); // Fix import BigDecimal
-        tutorProfile.setPriority(0);
-        tutorProfile.setTotalSessionsCompleted(0);
-        tutorProfile.setIsAvailable(true);
-        tutorProfile.setStatus(TutorStatus.PENDING); // Fix import TutorStatus
-
-        tutorProfile = tutorProfileRepository.save(tutorProfile);
-        return TutorMapper.toDTO(tutorProfile);
-    }
-
-    // PHƯƠNG THỨC CŨ ĐƯỢC THAY THẾ BẰNG @Override
-    @Override
-    public TutorDTO updateTutor(Integer id, TutorRequest request) {
-        TutorProfile tutorProfile = tutorProfileRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + id));
-
-        // Update major if provided (this might be allowed or not, depending on business logic)
-        User user = tutorProfile.getUser();
-        if (request.getMajorId() != null) {
-            Major major = majorRepository.findById(request.getMajorId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
-            user.setMajor(major);
-            userRepository.save(user);
-        }
-
-        // Handle subjects - only update if provided and not empty
-        if (request.getSubjects() != null && !request.getSubjects().isEmpty()) {
-            // Clear existing subjects
-            tutorProfile.getSubjects().clear();
-
-            // Add subjects by IDs
-            for (Integer subjectId : request.getSubjects()) {
-                Subject subject = subjectRepository.findById(subjectId)
-                        .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
-                tutorProfile.getSubjects().add(subject);
-            }
-        }
-
-        // Update TutorProfile fields - only if not null and not empty
-        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
-            user.setAcademicStatus(request.getTitle().trim());
-            userRepository.save(user);
-        }
-
-        if (request.getExperienceYears() != null) {
-            tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
-        }
-
-        if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
-            tutorProfile.setBio(request.getDescription().trim());
-        }
-
-        tutorProfile = tutorProfileRepository.save(tutorProfile);
-        return TutorMapper.toDTO(tutorProfile);
-    }
-
-    @Override
-    @Transactional
-    public void deleteTutor(Integer id) {
-        TutorProfile tutorProfile = tutorProfileRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + id));
-
-        User user = tutorProfile.getUser();
-        if (user == null) {
-            throw new DataNotFoundExceptions("User not found for tutor profile id: " + id);
-        }
-
-        // Soft delete: set status to INACTIVE
-        Status inactiveStatus = statusRepository.findByName("INACTIVE")
-                .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
-
-        user.setStatus(inactiveStatus);
-        userRepository.save(user);
-    }
-
-    @Override
-    public Integer getUserIdFromTutorProfile(Integer tutorProfileId) {
-        TutorProfile tutorProfile = tutorProfileRepository.findById(tutorProfileId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found with id: " + tutorProfileId));
-        return tutorProfile.getUser() != null ? tutorProfile.getUser().getId() : null;
-    }
 
     @Override
     public TutorDetailDTO getTutorDetail(Integer userId) {
@@ -187,7 +77,7 @@ public class TutorServiceImp implements TutorService {
         return TutorDetailMapper.toDTO(user, tutorProfile, schedules);
     }
 
-    @Override // <--- THÊM @Override
+    @Override
     @Transactional
     public TutorDetailDTO updateTutorProfile(Integer userId, TutorProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
@@ -219,14 +109,13 @@ public class TutorServiceImp implements TutorService {
 
     @Override
     public Page<StudentSessionDTO> getPendingStudentSessions(Integer tutorId, Pageable pageable) {
-        // Lấy các yêu cầu đăng ký đang PENDING cho các session của tutor (paged)
+        // Lấy các yêu cầu đăng ký đang PENDING cho các session của tutor với pagination
         Page<StudentSession> pendingSessionsPage = studentSessionRepository
-                .findPendingSessionsByTutorId(tutorId, StudentSessionStatus.PENDING, pageable);
+                .findPendingSessionsByTutorId(tutorId, (byte) StudentSessionStatus.PENDING, pageable);
 
         return pendingSessionsPage.map(StudentSessionMapper::toDTO);
     }
 
-    // Đổi tên để khớp với TutorService interface
     @Override
     @Transactional
     public List<StudentSessionDTO> approveStudentSessions(Integer tutorId, List<Integer> studentSessionIds) {
@@ -319,60 +208,8 @@ public class TutorServiceImp implements TutorService {
         return results;
     }
 
-    // Interface single approve method -> delegate to private approve
-    @Override
-    public StudentSessionDTO approveStudentSession(Integer tutorId, Integer studentSessionId) {
-        return approve(tutorId, studentSessionId);
-    }
-
-    // Implement single reject action expected by the interface
-    @Override
-    @Transactional
-    public StudentSessionDTO rejectStudentSession(Integer tutorId, Integer studentSessionId) {
-        // Kiểm tra tutor tồn tại
-        User tutor = userRepository.findById(tutorId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + tutorId));
-
-        if (!"TUTOR".equalsIgnoreCase(tutor.getRole())) {
-            throw new IllegalArgumentException("User does not have tutor privileges");
-        }
-
-        StudentSession studentSession = studentSessionRepository.findById(studentSessionId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Student session not found with id: " + studentSessionId));
-
-        // Kiểm tra quyền: session phải thuộc về tutor này
-        if (!studentSession.getSession().getTutor().getId().equals(tutorId)) {
-            throw new IllegalStateException("Bạn không có quyền từ chối yêu cầu này (session không thuộc về bạn)");
-        }
-
-        // Kiểm tra trạng thái phải là PENDING
-        if (studentSession.getStudentSessionStatus().getId() != StudentSessionStatus.PENDING) {
-            throw new IllegalStateException("Yêu cầu đăng ký không ở trạng thái chờ duyệt. Trạng thái hiện tại: "
-                    + studentSession.getStudentSessionStatus().getName());
-        }
-
-        StudentSessionStatus rejectedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.REJECTED)
-                .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus REJECTED not found"));
-        studentSession.setStudentSessionStatus(rejectedStatus);
-        studentSession = studentSessionRepository.save(studentSession);
-
-        // Xóa schedule đã thêm trước đó khi đăng ký bằng userId và sessionId
-        try {
-            Session session = studentSession.getSession();
-            scheduleRepository.deleteByUserIdAndSessionId(
-                    studentSession.getStudent().getId(),
-                    session.getId()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return StudentSessionMapper.toDTO(studentSession);
-    }
-
     @Override
     public List<SessionDTO> getWeekSchedule(Integer tutorId, Integer weekOffset) {
-    
         // Kiểm tra tutor có tồn tại không
         if (!userRepository.existsById(tutorId)) {
             throw new DataNotFoundExceptions("Tutor not found with id: " + tutorId);
@@ -397,10 +234,9 @@ public class TutorServiceImp implements TutorService {
         Instant endOfWeek = endOfTargetWeek.atStartOfDay(zoneId).toInstant();
 
         // Query các Session đang SCHEDULED trong tuần của tutor
-        // Đã sửa lỗi tham số: Giả định đã sửa SessionRepository để nhận đúng kiểu tham số
         List<Session> sessions = sessionRepository.findTutorScheduledSessionsInWeek(
                 tutorId,
-                (byte) SessionStatus.SCHEDULED, // Chuyển sang byte để khớp với Repository nếu cần
+                SessionStatus.SCHEDULED,
                 startOfWeek,
                 endOfWeek
         );
