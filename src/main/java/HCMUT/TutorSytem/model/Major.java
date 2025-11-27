@@ -1,7 +1,6 @@
 package HCMUT.TutorSytem.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.ArrayList;

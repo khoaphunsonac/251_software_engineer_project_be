@@ -1,16 +1,14 @@
 package HCMUT.TutorSytem.controller;
 
-import HCMUT.TutorSytem.model.HcmutSso;
 import HCMUT.TutorSytem.payload.request.LoginRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
 import HCMUT.TutorSytem.service.HcmutSsoService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Encoders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.crypto.SecretKey;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")

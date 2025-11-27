@@ -1,20 +1,25 @@
 package HCMUT.TutorSytem.service.imp;
 
-import HCMUT.TutorSytem.Enum.DayOfWeek;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
-import HCMUT.TutorSytem.model.*;
+import HCMUT.TutorSytem.model.Session;
+import HCMUT.TutorSytem.model.SessionStatus;
+import HCMUT.TutorSytem.model.Subject;
+import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
-import HCMUT.TutorSytem.repo.*;
+import HCMUT.TutorSytem.repo.SessionRepository;
+import HCMUT.TutorSytem.repo.SessionStatusRepository;
+import HCMUT.TutorSytem.repo.SubjectRepository;
+import HCMUT.TutorSytem.repo.UserRepository;
 import HCMUT.TutorSytem.service.SessionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.*;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.Instant;
 
 @Service
 public class SessionServiceImp implements SessionService {
@@ -32,15 +37,10 @@ public class SessionServiceImp implements SessionService {
     private SessionStatusRepository sessionStatusRepository;
 
 
-    @Autowired
-    private TutorScheduleRepository tutorScheduleRepository;
-
     @Override
-    public List<SessionDTO> getAllSessions() {
-        List<Session> sessions = sessionRepository.findAll();
-        return sessions.stream()
-                .map(SessionMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<SessionDTO> getAllSessions(Pageable pageable) {
+        Page<Session> sessionsPage = sessionRepository.findAll(pageable);
+        return sessionsPage.map(SessionMapper::toDTO);
     }
 
     @Override

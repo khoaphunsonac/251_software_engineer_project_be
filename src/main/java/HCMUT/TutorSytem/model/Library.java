@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.UpdateTimestamp;
 
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
-@jakarta.persistence.Table(name = "`library`")
+@Table(name = "`library`")
 public class Library {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

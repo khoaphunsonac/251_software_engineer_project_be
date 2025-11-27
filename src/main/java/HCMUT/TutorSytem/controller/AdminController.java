@@ -1,15 +1,14 @@
 package HCMUT.TutorSytem.controller;
 
-import HCMUT.TutorSytem.dto.*;
+import HCMUT.TutorSytem.dto.SessionDTO;
+import HCMUT.TutorSytem.dto.TutorProfileResponse;
+import HCMUT.TutorSytem.dto.UserDTO;
 import HCMUT.TutorSytem.mapper.TutorProfileResponseMapper;
 import HCMUT.TutorSytem.model.TutorProfile;
-import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
-import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
 import HCMUT.TutorSytem.service.AdminService;
 import HCMUT.TutorSytem.service.TutorProfileService;
 import HCMUT.TutorSytem.util.PaginationUtil;
-import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
