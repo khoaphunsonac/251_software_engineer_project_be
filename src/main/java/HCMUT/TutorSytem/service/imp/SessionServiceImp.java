@@ -86,7 +86,6 @@ public class SessionServiceImp implements SessionService {
         session.setEndTime(request.getEndTime());
         session.setFormat(request.getFormat());
         session.setLocation(request.getLocation());
-        session.setDayOfWeek(calculateDayOfWeek(request.getStartTime()));
 
         // Set maxQuantity (bắt buộc, nếu không có thì dùng default 50)
         session.setMaxQuantity(request.getMaxQuantity() != null ? request.getMaxQuantity() : 50);

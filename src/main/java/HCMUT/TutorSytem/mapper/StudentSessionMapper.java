@@ -37,7 +37,6 @@ public class StudentSessionMapper {
             dto.setSessionId(studentSession.getSession().getId());
             dto.setSessionStartTime(studentSession.getSession().getStartTime());
             dto.setSessionEndTime(studentSession.getSession().getEndTime());
-            dto.setSessionDayOfWeek(studentSession.getSession().getDayOfWeek());
             dto.setSessionFormat(studentSession.getSession().getFormat());
             dto.setSessionLocation(studentSession.getSession().getLocation());
 
@@ -83,7 +82,6 @@ public class StudentSessionMapper {
             dto.setEndTime(studentSession.getSession().getEndTime());
             dto.setFormat(studentSession.getSession().getFormat());
             dto.setLocation(studentSession.getSession().getLocation());
-            dto.setDayOfWeek(studentSession.getSession().getDayOfWeek());
             dto.setSessionStatus(studentSession.getSession().getSessionStatus().getName());
 
             // Thông tin Tutor từ Session
