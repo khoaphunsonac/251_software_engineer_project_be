@@ -95,10 +95,12 @@ public class SessionServiceImp implements SessionService {
         // Set currentQuantity = 0 khi mới tạo
         session.setCurrentQuantity(0);
 
-        // Set sessionStatus mặc định là PENDING(id = 1)
-        SessionStatus scheduledStatus = sessionStatusRepository.findById(SessionStatus.PENDING)
-                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + SessionStatus.PENDING));
-        session.setSessionStatus(scheduledStatus);
+        // Set sessionStatus
+        // Nếu request có sessionStatusId thì dùng, không thì mặc định SCHEDULED (cho phép student đăng ký ngay)
+        Byte statusId = request.getSessionStatusId() != null ? request.getSessionStatusId() : SessionStatus.SCHEDULED;
+        SessionStatus sessionStatus = sessionStatusRepository.findById(statusId)
+                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + statusId));
+        session.setSessionStatus(sessionStatus);
 
         session = sessionRepository.save(session);
         return SessionMapper.toDTO(session);
