@@ -139,18 +139,19 @@ public class StudentServiceImp implements StudentService {
         }
 
         // 5. Kiểm tra xung đột lịch trong Schedule
-        // Sử dụng Instant từ session để kiểm tra conflict
-        if (session.getDayOfWeek() != null) {
-            boolean hasConflict = scheduleRepository.existsConflictingSchedule(
-                    studentId,
-                    session.getDayOfWeek(),
-                    session.getStartTime(),
-                    session.getEndTime()
-            );
+        // Tính dayOfWeek từ startTime
+        java.time.DayOfWeek javaDow = session.getStartTime().atZone(ZoneId.systemDefault()).getDayOfWeek();
+        HCMUT.TutorSytem.Enum.DayOfWeek customDayOfWeek = HCMUT.TutorSytem.Enum.DayOfWeek.fromJavaDayOfWeek(javaDow);
+        
+        boolean hasConflict = scheduleRepository.existsConflictingSchedule(
+                studentId,
+                customDayOfWeek,
+                session.getStartTime(),
+                session.getEndTime()
+        );
 
-            if (hasConflict) {
-                throw new IllegalStateException("Schedule conflict: Student already has a session at this time");
-            }
+        if (hasConflict) {
+            throw new IllegalStateException("Schedule conflict: Student already has a session at this time");
         }
 
         // 6. Tạo StudentSession với status = PENDING
@@ -167,13 +168,14 @@ public class StudentServiceImp implements StudentService {
 
         // 7. Thêm vào Schedule để ngăn đăng ký session khác trùng giờ
         // Lưu sessionId thay vì startTime/endTime
-        if (session.getDayOfWeek() != null) {
-            Schedule schedule = new Schedule();
-            schedule.setUser(student);
-            schedule.setSession(session);
-            schedule.setDayOfWeek(session.getDayOfWeek());
-            scheduleRepository.save(schedule);
-        }
+        Schedule schedule = new Schedule();
+        schedule.setUser(student);
+        schedule.setSession(session);
+        // Tính dayOfWeek từ session startTime
+        java.time.DayOfWeek javaDow2 = session.getStartTime().atZone(ZoneId.systemDefault()).getDayOfWeek();
+        HCMUT.TutorSytem.Enum.DayOfWeek customDayOfWeek2 = HCMUT.TutorSytem.Enum.DayOfWeek.fromJavaDayOfWeek(javaDow2);
+        schedule.setDayOfWeek(customDayOfWeek2);
+        scheduleRepository.save(schedule);
 
         // 8. Return DTO
         return StudentSessionMapper.toDTO(studentSession);

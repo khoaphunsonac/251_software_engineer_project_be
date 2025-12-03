@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.model;
 
-import HCMUT.TutorSytem.Enum.DayOfWeek;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,10 +37,6 @@ public class Session {
 
     @Column(name = "end_time", nullable = false)
     private Instant endTime;
-
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "day_of_week", nullable = false)
-    private DayOfWeek dayOfWeek;
 
     @Column(name = "format", length = 50)
     private String format;
